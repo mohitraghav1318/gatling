@@ -10,5 +10,7 @@ export default defineConfig({
   ],
   // Tailwind v4 emits custom at-rules that trigger noisy warnings in lightningcss.
   // esbuild keeps the output clean while preserving the same build behavior here.
-  cssMinify: 'esbuild',
+  build: {
+    cssMinify: 'esbuild',
+  },
 });
