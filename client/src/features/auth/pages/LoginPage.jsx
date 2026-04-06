@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth.api';
 import AuthCard from '../components/AuthCard';
 import AuthField from '../components/AuthField';
 import AuthMessage from '../components/AuthMessage';
 import { APP_ROUTES } from '../../../shared/config/routes';
 import { APP_STORAGE_KEYS } from '../../../shared/config/env';
+import { hasAuthToken } from '../../../shared/utils/authSession';
 
 const LOGIN_MODE = {
   password: 'password',
@@ -16,6 +17,7 @@ const LOGIN_MODE = {
 const MotionMain = motion.main;
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState(LOGIN_MODE.password);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,6 +27,13 @@ export default function LoginPage() {
   const [otpRequested, setOtpRequested] = useState(false);
 
   const [message, setMessage] = useState({ type: 'info', text: '' });
+
+  // Automatically redirect to dashboard if the user already has a valid token
+  useEffect(() => {
+    if (hasAuthToken()) {
+      navigate(APP_ROUTES.dashboard, { replace: true });
+    }
+  }, [navigate]);
 
   function storeTokenFromResponse(response) {
     if (response?.data?.token) {
@@ -40,12 +49,12 @@ export default function LoginPage() {
     try {
       const response = await authApi.loginWithPassword({ email, password });
       storeTokenFromResponse(response);
+      navigate(APP_ROUTES.dashboard, { replace: true });
       setMessage({ type: 'success', text: 'Login successful.' });
     } catch (error) {
       setMessage({
         type: 'error',
-        text:
-          error?.response?.data?.message || 'Could not login with password.',
+        text: error?.response?.data?.message || 'Could not login with password.',
       });
     } finally {
       setIsLoading(false);
@@ -82,6 +91,7 @@ export default function LoginPage() {
     try {
       const response = await authApi.verifyLoginOtp({ email, otp });
       storeTokenFromResponse(response);
+      navigate(APP_ROUTES.dashboard, { replace: true });
       setMessage({ type: 'success', text: 'OTP login successful.' });
     } catch (error) {
       setMessage({
@@ -99,32 +109,24 @@ export default function LoginPage() {
   }
 
   return (
+    // MotionMain animates smoothly upon rendering the page
     <MotionMain
-      className="page-content mx-auto w-full max-w-6xl px-4 pb-10 pt-8 md:px-6"
+      className="w-full flex items-center justify-center p-4 relative z-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.28 }}
+      transition={{ duration: 0.3 }}
     >
       <AuthCard
-        title="Login"
-        subtitle="Use either password login or OTP login based on your preference."
+        title="Welcome Back"
+        subtitle="Log in using your preferred method below."
       >
-        <div
-          className="mb-4 grid grid-cols-2 gap-2 rounded-xl border p-1"
-          style={{ borderColor: 'hsl(var(--color-border))' }}
-        >
+        <div className="mb-6 flex overflow-hidden rounded-2xl bg-stable-100 p-1 ring-1 ring-inset ring-stable-200/60 shadow-inner">
           <button
-            className="rounded-lg px-3 py-2 text-sm font-semibold"
-            style={{
-              background:
-                mode === LOGIN_MODE.password
-                  ? 'hsl(var(--color-primary))'
-                  : 'transparent',
-              color:
-                mode === LOGIN_MODE.password
-                  ? 'hsl(var(--color-on-primary))'
-                  : 'hsl(var(--color-text))',
-            }}
+            className={`w-1/2 rounded-xl px-4 py-2.5 text-sm font-bold tracking-wide transition-all ${
+              mode === LOGIN_MODE.password
+                ? 'bg-teal-600 text-white shadow-sm shadow-teal-500/30 ring-1 ring-teal-500'
+                : 'text-stable-600 hover:bg-stable-200 hover:text-stable-900'
+            }`}
             onClick={() => {
               setMode(LOGIN_MODE.password);
               setMessage({ type: 'info', text: '' });
@@ -135,17 +137,11 @@ export default function LoginPage() {
           </button>
 
           <button
-            className="rounded-lg px-3 py-2 text-sm font-semibold"
-            style={{
-              background:
-                mode === LOGIN_MODE.otp
-                  ? 'hsl(var(--color-primary))'
-                  : 'transparent',
-              color:
-                mode === LOGIN_MODE.otp
-                  ? 'hsl(var(--color-on-primary))'
-                  : 'hsl(var(--color-text))',
-            }}
+            className={`w-1/2 rounded-xl px-4 py-2.5 text-sm font-bold tracking-wide transition-all ${
+              mode === LOGIN_MODE.otp
+                ? 'bg-teal-600 text-white shadow-sm shadow-teal-500/30 ring-1 ring-teal-500'
+                : 'text-stable-600 hover:bg-stable-200 hover:text-stable-900'
+            }`}
             onClick={() => {
               setMode(LOGIN_MODE.otp);
               resetOtpMode();
@@ -153,15 +149,15 @@ export default function LoginPage() {
             }}
             type="button"
           >
-            OTP
+            OTP Code
           </button>
         </div>
 
         {mode === LOGIN_MODE.password ? (
-          <form className="space-y-4" onSubmit={handlePasswordLogin}>
+          <form className="space-y-5" onSubmit={handlePasswordLogin}>
             <AuthField
               id="login-email"
-              label="Email"
+              label="Email Address"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -182,20 +178,20 @@ export default function LoginPage() {
             />
 
             <button
-              className="btn-primary w-full rounded-xl px-4 py-2.5 font-semibold"
+              className="w-full rounded-2xl bg-teal-600 px-5 py-3.5 text-sm font-bold tracking-wide text-white transition-all hover:-translate-y-0.5 hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-500/30 focus:outline-none focus:ring-4 focus:ring-teal-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
               type="submit"
             >
-              {isLoading ? 'Logging in...' : 'Login with Password'}
+              {isLoading ? 'Logging in...' : 'Sign In'}
             </button>
           </form>
         ) : (
           <>
             {!otpRequested ? (
-              <form className="space-y-4" onSubmit={handleRequestOtp}>
+              <form className="space-y-5" onSubmit={handleRequestOtp}>
                 <AuthField
                   id="login-otp-email"
-                  label="Email"
+                  label="Email Address"
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
@@ -205,41 +201,41 @@ export default function LoginPage() {
                 />
 
                 <button
-                  className="btn-primary w-full rounded-xl px-4 py-2.5 font-semibold"
+                  className="w-full rounded-2xl bg-teal-600 px-5 py-3.5 text-sm font-bold tracking-wide text-white transition-all hover:-translate-y-0.5 hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-500/30 focus:outline-none focus:ring-4 focus:ring-teal-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading}
                   type="submit"
                 >
-                  {isLoading ? 'Requesting OTP...' : 'Request OTP'}
+                  {isLoading ? 'Requesting Code...' : 'Send OTP'}
                 </button>
               </form>
             ) : (
-              <form className="space-y-4" onSubmit={handleVerifyOtp}>
+              <form className="space-y-5" onSubmit={handleVerifyOtp}>
                 <AuthField
                   id="login-otp-code"
-                  label="OTP"
+                  label="One-Time Passcode"
                   value={otp}
                   onChange={(event) => setOtp(event.target.value)}
-                  placeholder="Enter OTP"
+                  placeholder="Enter 6-digit code"
                   autoComplete="one-time-code"
                   disabled={isLoading}
                 />
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3 mt-4">
                   <button
-                    className="btn-primary rounded-xl px-4 py-2.5 font-semibold"
+                    className="w-full rounded-2xl bg-teal-600 px-5 py-3.5 text-sm font-bold tracking-wide text-white transition-all hover:-translate-y-0.5 hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-500/30 focus:outline-none focus:ring-4 focus:ring-teal-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isLoading}
                     type="submit"
                   >
-                    {isLoading ? 'Verifying...' : 'Verify OTP'}
+                    {isLoading ? 'Verifying...' : 'Verify'}
                   </button>
 
                   <button
-                    className="btn-secondary rounded-xl px-4 py-2.5 font-semibold"
+                    className="w-full rounded-2xl bg-stable-100 border border-stable-200 px-5 py-3.5 text-sm font-bold tracking-wide text-stable-700 transition-all hover:bg-stable-200 focus:outline-none focus:ring-4 focus:ring-stable-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isLoading}
                     onClick={handleRequestOtp}
                     type="button"
                   >
-                    Resend OTP
+                    Resend Code
                   </button>
                 </div>
               </form>
@@ -247,13 +243,14 @@ export default function LoginPage() {
           </>
         )}
 
-        <AuthMessage type={message.type} text={message.text} />
+        <div className="mt-5">
+          <AuthMessage type={message.type} text={message.text} />
+        </div>
 
-        <p className="mt-5 text-sm text-muted">
+        <p className="mt-8 text-center text-sm font-medium text-stable-500">
           Need an account?{' '}
           <Link
-            className="font-semibold"
-            style={{ color: 'hsl(var(--color-primary))' }}
+            className="font-bold tracking-wide text-teal-600 underline-offset-4 hover:underline transition-all"
             to={APP_ROUTES.register}
           >
             Create one

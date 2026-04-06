@@ -51,7 +51,7 @@ function MeshCluster() {
 
 export default function HeroScene() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-[1] opacity-80">
+    <div className="pointer-events-none fixed inset-0 z-0 opacity-40">
       <Canvas camera={{ position: [0, 0, 4.2], fov: 52 }}>
         <ambientLight intensity={0.74} color={SCENE_COLORS.keyLight} />
         <directionalLight

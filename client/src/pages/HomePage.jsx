@@ -2,97 +2,45 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { APP_ROUTES } from '../shared/config/routes';
 
-const HOME_FEATURES = [
-  {
-    title: 'Secure Signup Flow',
-    description:
-      'Users verify email with OTP before setting password, reducing fake registrations.',
-  },
-  {
-    title: 'Flexible Login Methods',
-    description:
-      'Supports both password login and OTP login for better user experience.',
-  },
-  {
-    title: 'Scalable Architecture',
-    description:
-      'Feature-based folder structure keeps code readable and easier to grow later.',
-  },
-];
-
-const MotionDiv = motion.div;
-const MotionAside = motion.aside;
+const MotionMain = motion.main;
 
 export default function HomePage() {
   return (
-    <main className="page-content mx-auto w-full max-w-6xl px-4 pb-14 pt-10 md:px-6 md:pt-14">
-      <section className="grid gap-8 md:grid-cols-[1.2fr_0.8fr] md:items-start">
-        <MotionDiv
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: 'easeOut' }}
+    <MotionMain 
+      className="flex flex-col items-center justify-center text-center p-6 mt-12 relative z-10"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+    >
+      <div className="inline-flex items-center justify-center rounded-full border border-teal-200 bg-teal-50 px-4 py-1.5 mb-8 shadow-sm">
+        <span className="text-xs font-bold uppercase tracking-wider text-teal-700">
+          Frontend Starter
+        </span>
+      </div>
+
+      <h1 className="max-w-4xl text-5xl md:text-7xl leading-tight font-extrabold text-stable-900 tracking-tight">
+        Build auth flows that are <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500">easy to scale</span>.
+      </h1>
+
+      <p className="mt-8 max-w-2xl text-lg md:text-xl text-stable-600 leading-relaxed font-medium">
+        This starter UI includes a production-minded structure, smooth motion, and reusable auth components centered around your users.
+      </p>
+
+      <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 w-full justify-center max-w-md mx-auto">
+        <Link
+          to={APP_ROUTES.register}
+          className="w-full sm:w-auto text-center rounded-full bg-teal-600 px-8 py-4 text-sm md:text-base font-bold tracking-wide text-white transition-all hover:-translate-y-1 hover:bg-teal-700 hover:shadow-xl hover:shadow-teal-500/30 focus:outline-none focus:ring-4 focus:ring-teal-500/30"
         >
-          <p
-            className="mb-3 inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-            style={{
-              borderColor: 'hsl(var(--color-border))',
-              color: 'hsl(var(--color-text-muted))',
-            }}
-          >
-            Frontend Starter
-          </p>
+          Start Registration
+        </Link>
 
-          <h1 className="text-4xl leading-tight font-bold md:text-5xl">
-            Build auth flows that are easy to read, debug, and scale.
-          </h1>
-
-          <p className="text-muted mt-4 max-w-xl text-base md:text-lg">
-            This starter UI includes a production-minded structure, smooth
-            motion, and reusable auth components so you can keep building
-            features faster.
-          </p>
-
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              className="btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold"
-              to={APP_ROUTES.register}
-            >
-              Start Registration
-            </Link>
-
-            <Link
-              className="btn-secondary rounded-xl px-4 py-2.5 text-sm font-semibold"
-              to={APP_ROUTES.login}
-            >
-              Open Login Page
-            </Link>
-          </div>
-        </MotionDiv>
-
-        <MotionAside
-          className="surface-card p-5"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.1, ease: 'easeOut' }}
+        <Link
+          to={APP_ROUTES.login}
+          className="w-full sm:w-auto text-center rounded-full border-2 border-stable-200 bg-white px-8 py-4 text-sm md:text-base font-bold tracking-wide text-stable-700 transition-all hover:bg-stable-50 hover:border-stable-300 focus:outline-none focus:ring-4 focus:ring-stable-500/20"
         >
-          <h2 className="text-lg font-semibold">What you already have</h2>
-          <ul className="mt-4 space-y-3">
-            {HOME_FEATURES.map((item) => (
-              <li
-                key={item.title}
-                className="rounded-lg border p-3"
-                style={{
-                  borderColor: 'hsl(var(--color-border))',
-                  background: 'hsl(var(--color-surface))',
-                }}
-              >
-                <h3 className="text-sm font-bold">{item.title}</h3>
-                <p className="text-muted mt-1 text-sm">{item.description}</p>
-              </li>
-            ))}
-          </ul>
-        </MotionAside>
-      </section>
-    </main>
+          Open Login Page
+        </Link>
+      </div>
+    </MotionMain>
   );
 }

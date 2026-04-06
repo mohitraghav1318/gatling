@@ -1,149 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
-@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
 
-:root {
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-body: 'Manrope', sans-serif;
-
-  --color-bg: 42 44% 96%;
-  --color-bg-soft: 182 38% 94%;
-  --color-surface: 0 0% 100%;
-  --color-surface-strong: 180 15% 91%;
-  --color-text: 215 35% 15%;
-  --color-text-muted: 210 14% 40%;
-  --color-border: 206 24% 82%;
-  --color-primary: 176 54% 34%;
-  --color-primary-strong: 176 61% 26%;
-  --color-accent: 20 85% 57%;
-  --color-on-primary: 0 0% 100%;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  min-height: 100%;
+@theme {
+  --font-sans: 'Montserrat', sans-serif;
+  --color-stable-50: #f8fafc;
+  --color-stable-100: #f1f5f9;
+  --color-stable-200: #e2e8f0;
+  --color-stable-300: #cbd5e1;
+  --color-stable-400: #94a3b8;
+  --color-stable-500: #64748b;
+  --color-stable-600: #475569;
+  --color-stable-700: #334155;
+  --color-stable-800: #1e293b;
+  --color-stable-900: #0f172a;
 }
 
 body {
-  margin: 0;
-  font-family: var(--font-body);
-  color: hsl(var(--color-text));
-  background:
-    radial-gradient(
-      circle at 14% 18%,
-      hsl(var(--color-bg-soft)) 0%,
-      transparent 42%
-    ),
-    radial-gradient(
-      circle at 88% 72%,
-      hsl(var(--color-surface-strong)) 0%,
-      transparent 36%
-    ),
-    hsl(var(--color-bg));
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 0;
-  font-family: var(--font-heading);
-}
-
-.app-shell {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-}
-
-.grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(
-      to right,
-      hsl(var(--color-border) / 0.35) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      to bottom,
-      hsl(var(--color-border) / 0.35) 1px,
-      transparent 1px
-    );
-  background-size: 42px 42px;
-  mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.page-content {
-  position: relative;
-  z-index: 2;
-}
-
-.surface-card {
-  border: 1px solid hsl(var(--color-border));
-  background: hsl(var(--color-surface) / 0.92);
-  backdrop-filter: blur(8px);
-  border-radius: 1rem;
-  box-shadow: 0 20px 45px -26px hsl(var(--color-text) / 0.38);
-}
-
-.text-muted {
-  color: hsl(var(--color-text-muted));
-}
-
-.btn-primary {
-  border: 1px solid hsl(var(--color-primary));
-  background: linear-gradient(
-    130deg,
-    hsl(var(--color-primary)) 0%,
-    hsl(var(--color-primary-strong)) 100%
-  );
-  color: hsl(var(--color-on-primary));
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 26px -16px hsl(var(--color-primary));
-}
-
-.btn-secondary {
-  border: 1px solid hsl(var(--color-border));
-  color: hsl(var(--color-text));
-  background: hsl(var(--color-surface));
-}
-
-.input-field {
-  width: 100%;
-  border: 1px solid hsl(var(--color-border));
-  border-radius: 0.75rem;
-  padding: 0.68rem 0.9rem;
-  color: hsl(var(--color-text));
-  background: hsl(var(--color-surface));
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.input-field:focus {
-  outline: none;
-  border-color: hsl(var(--color-primary));
-  box-shadow: 0 0 0 4px hsl(var(--color-primary) / 0.15);
-}
-
-.input-label {
-  margin-bottom: 0.36rem;
-  font-size: 0.86rem;
-  font-weight: 600;
-  color: hsl(var(--color-text));
+  font-family: var(--font-sans);
+  background-color: var(--color-stable-50);
+  color: var(--color-stable-900);
+  overflow-x: hidden;
 }
