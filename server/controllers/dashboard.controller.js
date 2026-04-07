@@ -87,6 +87,30 @@ function formatActivities(activityDocuments) {
   }));
 }
 
+// Beginner note:
+// This helper reads all active memberships for one user and converts them
+// into a simple organizations array that frontend can render directly.
+async function getActiveOrganizationsForUser(userId) {
+  const memberships = await OrganizationMembership.find({
+    user: userId,
+    status: 'active',
+  })
+    .populate('organization', 'name slug description createdAt')
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return memberships
+    .filter((membership) => membership.organization)
+    .map((membership) => ({
+      id: membership.organization._id,
+      name: membership.organization.name,
+      slug: membership.organization.slug,
+      description: membership.organization.description,
+      role: membership.role,
+      joinedAt: membership.createdAt,
+    }));
+}
+
 exports.getOverview = async (req, res) => {
   try {
     const user = await User.findById(req.authUserId);
@@ -99,25 +123,7 @@ exports.getOverview = async (req, res) => {
     }
 
     await ensureUsernameForUser(user);
-
-    const memberships = await OrganizationMembership.find({
-      user: user._id,
-      status: 'active',
-    })
-      .populate('organization', 'name slug description createdAt')
-      .sort({ createdAt: -1 })
-      .lean();
-
-    const organizations = memberships
-      .filter((membership) => membership.organization)
-      .map((membership) => ({
-        id: membership.organization._id,
-        name: membership.organization.name,
-        slug: membership.organization.slug,
-        description: membership.organization.description,
-        role: membership.role,
-        joinedAt: membership.createdAt,
-      }));
+    const organizations = await getActiveOrganizationsForUser(user._id);
 
     const activityLogs = await ActivityLog.find({ actor: user._id })
       .populate('organization', 'name slug')
@@ -135,6 +141,24 @@ exports.getOverview = async (req, res) => {
       res,
       HTTP_STATUS.INTERNAL_SERVER_ERROR,
       'Failed to load dashboard overview',
+    );
+  }
+};
+
+// Dedicated endpoint to fetch only organizations where the current user
+// is enrolled as an active member (owner/admin/member).
+exports.getMyOrganizations = async (req, res) => {
+  try {
+    const organizations = await getActiveOrganizationsForUser(req.authUserId);
+
+    return sendSuccess(res, HTTP_STATUS.OK, 'Organizations loaded', {
+      organizations,
+    });
+  } catch (_error) {
+    return sendError(
+      res,
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      'Failed to load organizations',
     );
   }
 };

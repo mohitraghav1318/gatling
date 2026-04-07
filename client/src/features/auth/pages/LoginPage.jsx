@@ -54,7 +54,8 @@ export default function LoginPage() {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: error?.response?.data?.message || 'Could not login with password.',
+        text:
+          error?.response?.data?.message || 'Could not login with password.',
       });
     } finally {
       setIsLoading(false);
@@ -63,11 +64,17 @@ export default function LoginPage() {
 
   async function handleRequestOtp(event) {
     event.preventDefault();
+
+    if (!email.trim()) {
+      setMessage({ type: 'error', text: 'Please enter your email first.' });
+      return;
+    }
+
     setIsLoading(true);
     setMessage({ type: 'info', text: '' });
 
     try {
-      const response = await authApi.requestLoginOtp({ email });
+      const response = await authApi.requestLoginOtp({ email: email.trim() });
       setOtpRequested(true);
       setMessage({
         type: 'success',
@@ -85,11 +92,21 @@ export default function LoginPage() {
 
   async function handleVerifyOtp(event) {
     event.preventDefault();
+
+    // Keep this check on client side for a friendlier UX before API call.
+    if (!otp.trim()) {
+      setMessage({ type: 'error', text: 'Please enter the OTP code.' });
+      return;
+    }
+
     setIsLoading(true);
     setMessage({ type: 'info', text: '' });
 
     try {
-      const response = await authApi.verifyLoginOtp({ email, otp });
+      const response = await authApi.verifyLoginOtp({
+        email: email.trim(),
+        otp: otp.trim(),
+      });
       storeTokenFromResponse(response);
       navigate(APP_ROUTES.dashboard, { replace: true });
       setMessage({ type: 'success', text: 'OTP login successful.' });

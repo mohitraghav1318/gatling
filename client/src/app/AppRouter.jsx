@@ -3,6 +3,7 @@ import HomePage from '../pages/HomePage';
 import LoginPage from '../features/auth/pages/LoginPage';
 import RegisterPage from '../features/auth/pages/RegisterPage';
 import MemberDashboardPage from '../features/member/pages/MemberDashboardPage';
+import OrganizationSettingsPage from '../features/organization/pages/OrganizationSettingsPage';
 import AppHeader from '../shared/components/layout/AppHeader';
 import HeroScene from '../shared/components/three/HeroScene';
 import { APP_ROUTES } from '../shared/config/routes';
@@ -17,7 +18,6 @@ export default function AppRouter() {
         Flex column makes sure the header stays on top and content expands below.
       */}
       <div className="relative min-h-screen flex flex-col font-sans text-stable-900 bg-stable-50 overflow-hidden">
-        
         {/* Animated & 3D Background elements */}
         {/* The 3D Canvas sits fixed in the background */}
         <div className="absolute inset-0 z-0 opacity-60">
@@ -57,6 +57,14 @@ export default function AppRouter() {
                 }
               />
               <Route
+                path={`${APP_ROUTES.dashboardOrgBase}/:organizationName/settings`}
+                element={
+                  <ProtectedRoute>
+                    <OrganizationSettingsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path={`${APP_ROUTES.dashboardUserBase}/:username`}
                 element={
                   <ProtectedRoute>
@@ -64,11 +72,13 @@ export default function AppRouter() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="*" element={<Navigate replace to={APP_ROUTES.home} />} />
+              <Route
+                path="*"
+                element={<Navigate replace to={APP_ROUTES.home} />}
+              />
             </Routes>
           </div>
         </div>
-
       </div>
     </BrowserRouter>
   );

@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const organizationRoutes = require('./routes/organization.routes');
 const connectDatabase = require('./config/databse');
 
 const app = express();
@@ -17,6 +18,10 @@ app.use('/api/auth', authRoutes);
 
 // Dashboard APIs are protected by Bearer auth middleware inside their route module.
 app.use('/api/dashboard', dashboardRoutes);
+
+// Dedicated organization APIs.
+// These make it easy for frontend to create/join/open/list organizations.
+app.use('/api/org', organizationRoutes);
 
 const PORT = process.env.PORT || 3000;
 

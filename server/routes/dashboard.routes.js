@@ -1,5 +1,6 @@
 const express = require('express');
 const dashboardController = require('../controllers/dashboard.controller');
+const organizationController = require('../controllers/organization.controller');
 const { requireAuth } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
@@ -16,9 +17,13 @@ router.patch('/profile', dashboardController.updateProfile);
 router.patch('/profile/username', dashboardController.updateUsername);
 
 // Organization workflows.
-router.post('/org', dashboardController.createOrganization);
-router.post('/org/join', dashboardController.joinOrganization);
-router.get('/org/:organizationName', dashboardController.getOrganizationBySlug);
+router.get('/org/mine', organizationController.getMyOrganizations);
+router.post('/org', organizationController.createOrganization);
+router.post('/org/join', organizationController.joinOrganization);
+router.get(
+  '/org/:organizationName',
+  organizationController.getOrganizationBySlug,
+);
 
 // Public-style user path in dashboard space.
 router.get('/u/:username', dashboardController.getUserByUsername);
