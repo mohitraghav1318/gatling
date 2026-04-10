@@ -13,8 +13,5 @@ router.post('/login/password', authController.loginWithPassword);
 router.post('/login/otp/request', authController.requestLoginOtp);
 router.post('/login/otp/verify', authController.verifyLoginOtp);
 
-// Backward-compatible routes for older frontend code.
-router.post('/register', authController.register);
-router.post('/login', authController.login);
 
 module.exports = router;

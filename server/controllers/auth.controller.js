@@ -10,6 +10,7 @@ const {
 const { generateOtp, hashOtp, compareOtp } = require('../utils/otp.util');
 const { sendOtpEmail, MailDeliveryError } = require('../services/mail.service');
 const { ensureUsernameForUser } = require('../utils/username.util');
+const { sendSuccess, sendError } = require('../utils/response.util');
 
 // Keep common HTTP codes centralized.
 const HTTP_STATUS = {
@@ -30,21 +31,6 @@ const OTP_POLICY = {
   maxAttempts: 5,
   resendCooldownSeconds: 60,
 };
-
-function sendSuccess(res, status, message, data = null) {
-  return res.status(status).json({
-    success: true,
-    message,
-    data,
-  });
-}
-
-function sendError(res, status, message) {
-  return res.status(status).json({
-    success: false,
-    message,
-  });
-}
 
 function getWaitSeconds(futureDate) {
   if (!futureDate) return 0;

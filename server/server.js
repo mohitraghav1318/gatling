@@ -4,24 +4,26 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
-const dashboardRoutes = require('./routes/dashboard.routes');
-const organizationRoutes = require('./routes/organization.routes');
 const connectDatabase = require('./config/databse');
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+  }),
+);
 app.use(express.json());
 
 // Mount authentication routes under /api/auth.
 app.use('/api/auth', authRoutes);
 
-// Dashboard APIs are protected by Bearer auth middleware inside their route module.
-app.use('/api/dashboard', dashboardRoutes);
+// Mount dashboard and organization routes under /api/dashboard and /api/org respectively.
+app.use('/api/dashboard', require('./routes/dashboard.routes'));
+app.use('/api/org', require('./routes/org.routes'));
 
-// Dedicated organization APIs.
-// These make it easy for frontend to create/join/open/list organizations.
-app.use('/api/org', organizationRoutes);
+// Mount user profile routes under /api/user.
+app.use('/api/user', require('./routes/user.routes'));
 
 const PORT = process.env.PORT || 3000;
 
@@ -40,5 +42,10 @@ async function startServer() {
     process.exit(1);
   }
 }
+
+// Catch any request that didn't match any route above.
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
 
 startServer();
