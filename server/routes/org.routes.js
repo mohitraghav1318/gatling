@@ -1,3 +1,17 @@
+import {
+  getMailConfig,
+  createMailConfig,
+  updateMailConfig,
+} from '../controllers/mailConfig.controller.js';
+
+import {
+  listCampaigns,
+  getCampaign,
+  createCampaign,
+  updateCampaign,
+  deleteCampaign,
+} from '../controllers/campaign.controller.js';
+
 const express = require('express');
 const router = express.Router();
 const orgController = require('../controllers/org.controller');
@@ -80,6 +94,53 @@ router.get(
   '/:orgSlug/mail-config',
   requireRole('owner'),
   orgController.getMailConfig,
+);
+
+// Any member can view the org's mail config
+router.get('/:orgId/mail-config', requireAuth, getMailConfig);
+
+// Only the org owner can create or update it
+router.post(
+  '/:orgId/mail-config',
+  requireAuth,
+  requireRole('owner'),
+  createMailConfig,
+);
+router.put(
+  '/:orgId/mail-config',
+  requireAuth,
+  requireRole('owner'),
+  updateMailConfig,
+);
+
+// List all campaigns for this org
+router.get('/:orgId/campaigns', requireAuth, listCampaigns);
+
+// Get a single campaign by ID
+router.get('/:orgId/campaigns/:campaignId', requireAuth, getCampaign);
+
+// Create a new draft campaign (admin + owner)
+router.post(
+  '/:orgId/campaigns',
+  requireAuth,
+  requireRole('admin'),
+  createCampaign,
+);
+
+// Edit a draft campaign (admin + owner)
+router.put(
+  '/:orgId/campaigns/:campaignId',
+  requireAuth,
+  requireRole('admin'),
+  updateCampaign,
+);
+
+// Delete a draft campaign (owner only — destructive action)
+router.delete(
+  '/:orgId/campaigns/:campaignId',
+  requireAuth,
+  requireRole('owner'),
+  deleteCampaign,
 );
 
 module.exports = router;

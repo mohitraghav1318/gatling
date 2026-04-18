@@ -1,4 +1,4 @@
-const dashboardService = require('../services/dashboard.service');
+const dashboardService = require('./server/services/dashboard.service');
 
 // GET /api/dashboard
 // Reads the logged in user's id from the request,
