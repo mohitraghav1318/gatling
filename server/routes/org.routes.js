@@ -12,6 +12,11 @@ import {
   deleteCampaign,
 } from '../controllers/campaign.controller.js';
 
+import upload from "../config/multer.js";
+import { uploadCsv } from "../controllers/campaign.controller.js";
+ 
+ 
+
 const express = require('express');
 const router = express.Router();
 const orgController = require('../controllers/org.controller');
@@ -141,6 +146,31 @@ router.delete(
   requireAuth,
   requireRole('owner'),
   deleteCampaign,
+);
+
+// How this route works differently from others:
+//   Most routes go:  requireAuth → controller
+//   This route goes: requireAuth → upload.single() → controller
+//
+// upload.single("csv") is multer doing its job.
+// It sits between auth and the controller and:
+//   - intercepts the incoming file
+//   - reads it into memory (as req.file.buffer)
+//   - rejects it if it is not a CSV or over 5MB
+//   - then passes control to uploadCsv controller
+//
+// "csv" in upload.single("csv") must match the
+// field name used in the frontend form — the key
+// the frontend sends the file under must be "csv".
+//
+// Admin and above can upload — same as create/edit.
+// ─────────────────────────────────────────────
+router.post(
+  "/:orgId/campaigns/:campaignId/upload-csv",
+  requireAuth,
+  requireRole("admin"),
+  upload.single("csv"),   // multer reads the file here before the controller runs
+  uploadCsv
 );
 
 module.exports = router;

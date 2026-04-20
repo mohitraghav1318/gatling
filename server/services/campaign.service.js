@@ -2,6 +2,9 @@
 
 import Campaign from '../models/campaign.model.js';
 
+import mongoose from 'mongoose';
+import CampaignJob from '../models/campaignJob.model.js';
+
 // ─────────────────────────────────────────────
 //  LIST — fetch all campaigns belonging to an org
 //  Sorted by newest first so the dashboard always
@@ -78,4 +81,62 @@ export const deleteCampaign = async (campaignId, orgId) => {
     org: orgId,
     status: 'draft', // cannot delete a campaign that is already in progress
   });
+};
+
+//   1. Opens a MongoDB transaction (session)
+//   2. Saves all recipient rows as campaignJobs
+//   3. Updates the campaign's totalRecipients
+//   4. If anything fails, rolls back everything
+//      so we never end up with a half-saved state
+// ─────────────────────────────────────────────
+export const saveRecipientsForCampaign = async (
+  campaignId,
+  orgId,
+  recipients,
+) => {
+  // A session is like a container for a transaction.
+  // MongoDB watches everything that happens inside this
+  // session — if something breaks, it undoes all of it.
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // Build the list of campaignJob documents to insert.
+    // One object per recipient row from the CSV.
+    const jobs = recipients.map((recipient) => ({
+      campaign: campaignId, // which campaign these jobs belong to
+      org: orgId, // which org owns this campaign
+      email: recipient.email, // the recipient's email address
+      csvRow: recipient, // the full CSV row — used later for {{name}} replacements
+      status: 'pending', // starts as pending — worker will pick this up in Step 5
+      attempts: 0, // how many send attempts have been made (starts at zero)
+    }));
+
+    // Save all jobs in one single DB call instead of one call per recipient.
+    // { session } tells MongoDB to include this operation in the transaction.
+    await CampaignJob.insertMany(jobs, { session });
+
+    // Update the campaign's totalRecipients count to match how many rows came in.
+    // $set replaces just this field — everything else on the campaign stays the same.
+    await Campaign.findOneAndUpdate(
+      { _id: campaignId, org: orgId },
+      { $set: { totalRecipients: recipients.length } },
+      { session },
+    );
+
+    // Everything worked — tell MongoDB to make these changes permanent
+    await session.commitTransaction();
+  } catch (err) {
+    // Something went wrong — undo everything that happened in this transaction.
+    // This means zero campaignJobs are saved and totalRecipients stays unchanged.
+    // Better to have nothing saved than to have a broken half-state.
+    await session.abortTransaction();
+
+    // Re-throw so the controller knows it failed and can send an error response
+    throw err;
+  } finally {
+    // Always end the session whether things worked or not.
+    // Not ending the session leaks DB connections over time.
+    session.endSession();
+  }
 };
